@@ -110,6 +110,15 @@
             android:id="@+id/sign_up_btn"
             android:textAllCaps="false" />
 
+        <TextView
+            android:id="@+id/sign_up_message"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center_horizontal"
+            android:text="@string/setting_up_your_account" />
     </LinearLayout>
 
 

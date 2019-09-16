@@ -83,6 +83,16 @@
             android:id="@+id/sign_in_btn"
             android:textAllCaps="false" />
 
+        <TextView
+            android:id="@+id/login_message"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center_horizontal"
+            android:text="Logging In Please wait..." />
+
     </LinearLayout>
 
     <TextView

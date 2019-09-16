@@ -13,4 +13,5 @@
     <string name="already_have_an_account">Already have an account?</string>
     <string name="firstname">First Name</string>
     <string name="lastname">Last Name</string>
+    <string name="setting_up_your_account">Setting Up your account. Please wait...</string>
 </resources>

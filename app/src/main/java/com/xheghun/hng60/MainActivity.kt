@@ -54,4 +54,12 @@ class MainActivity : FirebaseAppCompactActivity() {
             user_email.text = prefEmail
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        if (mAuth.currentUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+    }
 }

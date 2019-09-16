@@ -1,5 +1,7 @@
 package com.xheghun.hng60
 
+import android.animation.Animator
+import android.animation.AnimatorInflater
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -20,13 +22,17 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_login.*
 
+
 class LoginActivity : FirebaseAppCompactActivity() {
     private var error: String?  = null
     private lateinit var googleSignInClient: GoogleSignInClient
     private var RC_SIGN_IN: Int = 1220
+    private var fadeAnim: Animator? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        fadeAnim = AnimatorInflater.loadAnimator(this, R.animator.alpha)
 
         Glide.with(this).load(R.drawable.female_phone).into(bg_image)
 
@@ -40,10 +46,19 @@ class LoginActivity : FirebaseAppCompactActivity() {
         google_sign_in_btn.setOnClickListener { signWithGoogle() }
     }
 
+    fun fade(target: View, visibility: Int) {
+        fadeAnim?.apply {
+            setTarget(target)
+            start()
+            target.visibility = visibility
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         if (mAuth.currentUser != null) {
             startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 
@@ -66,7 +81,7 @@ class LoginActivity : FirebaseAppCompactActivity() {
             else -> {
                 val uEmail = email.text.toString().trim()
                 val uPass = password.text.toString().trim()
-
+                fade(login_message, View.VISIBLE)
                 mAuth.signInWithEmailAndPassword(uEmail,uPass)
                     .addOnCompleteListener(this) {task ->
                         if (task.isSuccessful) {
@@ -75,7 +90,15 @@ class LoginActivity : FirebaseAppCompactActivity() {
                             val dbRef = db.child("users").child("user_${mAuth.currentUser!!.uid}")
                             val ls = object : ValueEventListener {
                                 override fun onDataChange(dataSnapShot: DataSnapshot) {
-                                    dataSnapShot.getValue(Profile::class.java)
+                                    val firstname = dataSnapShot.child("firstname").value.toString()
+                                    val lastname = dataSnapShot.child("lastname").value.toString()
+
+                                    val intent =
+                                        Intent(applicationContext, MainActivity::class.java)
+                                    intent.putExtra("name", "$firstname $lastname")
+                                    intent.putExtra("email", mAuth.currentUser!!.email)
+                                    startActivity(intent)
+                                    finish()
                                 }
 
                                 override fun onCancelled(p0: DatabaseError) {
@@ -87,14 +110,9 @@ class LoginActivity : FirebaseAppCompactActivity() {
                                 }
                             }
                             dbRef.addValueEventListener(ls)
-                            val profile = Profile()
-
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.putExtra("name", "${profile.firstname} ${profile.lastname}")
-                            intent.putExtra("email", mAuth.currentUser!!.email)
-                            startActivity(intent)
                         } else {
-                            error = "unable to firebaseSignIn"
+                            error = "unable to sign in"
+                            fade(login_message, View.GONE)
                             Snackbar.make(findViewById(R.id.root_view), error!!,Snackbar.LENGTH_SHORT).show()
                         }
                     }
@@ -151,12 +169,13 @@ class LoginActivity : FirebaseAppCompactActivity() {
         val profile = Profile(firstname, lastname)
         val ref = database.reference
             ref.child("users")
-                .child("user_${mAuth.uid}").setValue(profile)
+                .child("user_${mAuth.currentUser!!.uid}").setValue(profile)
                 .addOnSuccessListener {
                     val intent = Intent(this, MainActivity::class.java)
                     intent.putExtra("name", "$firstname $lastname")
                     intent.putExtra("email", mAuth.currentUser!!.email)
                     startActivity(intent)
+                    finish()
                 }
     }
 }

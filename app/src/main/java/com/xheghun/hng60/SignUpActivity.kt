@@ -21,6 +21,7 @@ class SignUpActivity : FirebaseAppCompactActivity() {
         super.onStart()
         if (mAuth.currentUser != null) {
             startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 
@@ -48,6 +49,7 @@ class SignUpActivity : FirebaseAppCompactActivity() {
                 val uPass = password.text.toString().trim()
                 val firstName = first_name.text.toString().trim()
                 val lastname = last_name.text.toString().trim()
+                sign_up_message.visibility = View.VISIBLE
                 mAuth.createUserWithEmailAndPassword(uEmail, uPass)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
@@ -75,13 +77,16 @@ class SignUpActivity : FirebaseAppCompactActivity() {
         val profile = Profile(firstname, lastname)
         val ref = database.reference
         ref.child("users")
-            .child("user_${mAuth.uid}").setValue(profile)
+            .child("user_${mAuth.currentUser!!.uid}").setValue(profile)
             .addOnSuccessListener {
                 val intent = Intent(this, MainActivity::class.java)
                 intent.putExtra("name", "$firstname $lastname")
                 intent.putExtra("email", mAuth.currentUser!!.email)
+                sign_up_message.visibility = View.GONE
                 startActivity(intent)
                 finish()
+            }.addOnFailureListener {
+                sign_up_message.visibility = View.GONE
             }
     }
 }
