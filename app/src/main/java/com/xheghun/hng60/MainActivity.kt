@@ -22,6 +22,7 @@ class MainActivity : FirebaseAppCompactActivity() {
                 .setPositiveButton("yes") { _: DialogInterface, _: Int ->
                     mAuth.signOut()
                     startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
                 }
                 .show()
         }
@@ -30,16 +31,27 @@ class MainActivity : FirebaseAppCompactActivity() {
         val fullname = intent.getStringExtra("name")
         val email = intent.getStringExtra("email")
 
+        val prefname = "prefFullname"
+        val prefMail = "prefEmail"
+
         val pref = getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
         val editor = pref.edit()
-        editor.putString("prefFullname", fullname)
-        editor.putString("prefEmail", email)
-        editor.apply()
+        if (!fullname.isNullOrEmpty() && !email.isNullOrEmpty()) {
+            editor.putString(prefname, fullname)
+            editor.putString(prefMail, email)
+            editor.apply()
+        }
 
-        val prefFullname = pref.getString("prefFullname", "user")
-        val prefEmail = pref.getString("prefEmail", "user email")
+        val prefFullname = pref.getString(prefname, "")
+        val prefEmail = pref.getString(prefMail, "")
+
 
         user_name.text = prefFullname
-        user_email.text = prefEmail
+
+        if (prefEmail.isNullOrEmpty()) {
+            user_email.text = mAuth.currentUser!!.email
+        } else {
+            user_email.text = prefEmail
+        }
     }
 }
