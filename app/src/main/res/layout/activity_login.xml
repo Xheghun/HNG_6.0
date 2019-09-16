@@ -114,6 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/facebook"
+            android:onClick="facebookSignIn"
             android:id="@+id/facebook_sign_in_btn"
             android:textAllCaps="false"
             app:icon="@drawable/facebook_30px"

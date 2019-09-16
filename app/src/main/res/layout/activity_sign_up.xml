@@ -46,10 +46,13 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/first_name_layout"
             android:hint="@string/firstname">
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/first_name"
+                android:inputType="text"
                 android:paddingEnd="12dp"
                 android:drawableEnd="@drawable/ic_person"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -57,10 +60,13 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/last_name_layout"
             android:hint="@string/lastname">
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/last_name"
+                android:inputType="text"
                 android:paddingEnd="12dp"
                 android:drawableEnd="@drawable/ic_person"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -99,6 +105,7 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:layout_margin="10dp"
+            android:onClick="createAccount"
             android:text="@string/sign_up"
             android:id="@+id/sign_up_btn"
             android:textAllCaps="false" />

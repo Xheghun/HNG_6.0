@@ -7,12 +7,17 @@ import android.view.View
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.auth.api.signin.*
-import com.google.android.gms.common.api.Api
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : FirebaseAppCompactActivity() {
@@ -33,6 +38,13 @@ class LoginActivity : FirebaseAppCompactActivity() {
 
         sign_in_btn.setOnClickListener { firebaseSignIn() }
         google_sign_in_btn.setOnClickListener { signWithGoogle() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (mAuth.currentUser != null) {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
     }
 
     private fun signWithGoogle() {
@@ -58,7 +70,29 @@ class LoginActivity : FirebaseAppCompactActivity() {
                 mAuth.signInWithEmailAndPassword(uEmail,uPass)
                     .addOnCompleteListener(this) {task ->
                         if (task.isSuccessful) {
-                            startActivity(Intent(this,MainActivity::class.java))
+
+                            val db = FirebaseDatabase.getInstance().reference
+                            val dbRef = db.child("users").child("user_${mAuth.currentUser!!.uid}")
+                            val ls = object : ValueEventListener {
+                                override fun onDataChange(dataSnapShot: DataSnapshot) {
+                                    dataSnapShot.getValue(Profile::class.java)
+                                }
+
+                                override fun onCancelled(p0: DatabaseError) {
+                                    Toast.makeText(
+                                        applicationContext,
+                                        "unable to get user details",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                            dbRef.addValueEventListener(ls)
+                            val profile = Profile()
+
+                            val intent = Intent(this, MainActivity::class.java)
+                            intent.putExtra("name", "${profile.firstname} ${profile.lastname}")
+                            intent.putExtra("email", mAuth.currentUser!!.email)
+                            startActivity(intent)
                         } else {
                             error = "unable to firebaseSignIn"
                             Snackbar.make(findViewById(R.id.root_view), error!!,Snackbar.LENGTH_SHORT).show()
@@ -118,6 +152,11 @@ class LoginActivity : FirebaseAppCompactActivity() {
         val ref = database.reference
             ref.child("users")
                 .child("user_${mAuth.uid}").setValue(profile)
-                .addOnSuccessListener { startActivity(Intent(this,MainActivity::class.java)) }
+                .addOnSuccessListener {
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.putExtra("name", "$firstname $lastname")
+                    intent.putExtra("email", mAuth.currentUser!!.email)
+                    startActivity(intent)
+                }
     }
 }
